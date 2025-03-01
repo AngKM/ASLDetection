@@ -1,0 +1,72 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from tabulate import tabulate  # For better table display
+
+# Example data
+x = [1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
+y = [0.6, 0.7, 1.5, 1.9, 2.1, 2.6, 2.9, 3.7, 3.5, 3.7, 3.8]
+
+# Compute squares and deviations
+x_squared = [i**2 for i in x]
+y_squared = [i**2 for i in y]
+mean_x, mean_y = np.mean(x), np.mean(y)
+
+x_minus_xbar = [i - mean_x for i in x]
+y_minus_ybar = [i - mean_y for i in y]
+y_minus_ybar2 = [i**2 for i in y_minus_ybar]
+x_minus_xbar2 = [i**2 for i in x_minus_xbar]
+x_minus_xbar_y_minus_ybar = [i * j for i, j in zip(x_minus_xbar, y_minus_ybar)]
+
+# Calculate regression coefficients
+b1 = np.sum(x_minus_xbar_y_minus_ybar) / np.sum(x_minus_xbar2)
+b0 = mean_y - (b1 * mean_x)
+
+# Predicted y values
+yhat = [b0 + (b1 * i) for i in x]
+yhat_minus_ybar2 = [(i - mean_y) ** 2 for i in yhat]
+
+# Create DataFrame
+df = pd.DataFrame({
+    'x': x,
+    'y': y,
+    'x²': x_squared,
+    'y²': y_squared,
+    'x - x̄': x_minus_xbar,
+    'y - ȳ': y_minus_ybar,
+    '(x - x̄)²': x_minus_xbar2,
+    '(y - ȳ)²': y_minus_ybar2,
+    '(x-x̄)(y-ȳ)': x_minus_xbar_y_minus_ybar,
+    'ŷ': yhat,
+    '(ŷ - ȳ)²': yhat_minus_ybar2
+})
+
+# Print the DataFrame using tabulate for clean output
+print(tabulate(df, headers='keys', tablefmt='fancy_grid', floatfmt=".4f"))
+
+# Display regression statistics
+print("\nSummary Statistics:")
+print(f"Sum of x: {np.sum(x)}")
+print(f"Sum of y: {np.sum(y)}")
+print(f"Sum of (x - x̄)²: {np.sum(x_minus_xbar2)}")
+print(f"Sum of (x - x̄)(y - ȳ): {np.sum(x_minus_xbar_y_minus_ybar)}")
+print(f"\nMean of x: {mean_x:.4f}")
+print(f"Mean of y: {mean_y:.4f}")
+print(f"\nRegression Equation: y = {b0:.4f} + {b1:.4f}x")
+print(f"SSR: {np.sum(yhat_minus_ybar2):.4f}")
+print(f"SST: {np.sum(y_minus_ybar2):.4f}")
+print(f"R²: {np.sum(yhat_minus_ybar2) / np.sum(y_minus_ybar2):.4f}")
+
+# Plot regression line
+plt.figure(figsize=(8, 6))
+plt.scatter(x, y, color='blue', label='Data Points')
+plt.plot(x, yhat, color='red', label=f'Regression Line: y = {b0:.2f} + {b1:.2f}x')
+
+# Formatting
+plt.xlabel('X-axis')
+plt.ylabel('Y-axis')
+plt.title('Linear Regression')
+plt.legend()
+plt.grid(True)
+plt.show()
